@@ -114,7 +114,7 @@ class Player(pygame.sprite.Sprite):
         basic_font = pygame.font.SysFont(None, 100)
         text = basic_font.render('BOOM!', True, (255, 255, 255))
         text_rect = text.get_rect()
-        text_rect.x = 300
+        text_rect.x = 200
         text_rect.y = 200
 
         # draw the text onto the surface
@@ -146,7 +146,7 @@ class Bullet(pygame.sprite.Sprite):
         self.image = pygame.Surface([10, 10])
         self.image.fill(WHITE)
         self.speed = [0,0]
-        self.base_speed = 10
+        self.base_speed = 20
         self.rect = self.image.get_rect()
 
     @staticmethod
@@ -175,8 +175,8 @@ class Shovel(pygame.sprite.Sprite):
         # load the PNG
         self.image = pygame.image.load(os.path.join('images', 'shovel.png'))
         self.rect = self.image.get_rect()
-        self.rect.x = random.randint(0, 718)
-        self.rect.y = random.randint(0, 480)
+        self.rect.x = random.randint(0, 700)
+        self.rect.y = random.randint(0, 450)
 
 def read_high_scores():
     if not os.path.isfile('high_scores'):
@@ -187,8 +187,8 @@ def read_high_scores():
 
     f = open('high_scores', 'r')
     scores = []
-    for score in f.readlines():
-        scores.append(score)
+    for s in f.readlines():
+        scores.append(s)
     f.close()
     return scores
 
@@ -245,22 +245,22 @@ def game_over():
         # handle input
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-		new_high_score()
-		score = 0
+                new_high_score()
+                score = 0
                 sys.exit()
 
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
                     screen.fill((0, 0, 0))
                     pygame.display.flip()
-		    new_high_score()
+                    new_high_score()
                     score = 0
                     main()
 
         death = pygame.image.load(os.path.join('images', 'death_screen.png'))
         screen.blit(death, [0, 0])
 
-        # set up the score text
+        # Keep showing score text
         text = basic_font.render('Score: %d' % score, True, (255, 255, 255))
         text_rect = text.get_rect()
         text_rect.x = screen_rect.x
@@ -403,7 +403,7 @@ def event_loop():
             return placement
         # Add new enemy randomly until max number of enemies
         if(random.randint(0,10) == 5):
-            if(enemy_count < score%10 + 3):
+            if(enemy_count < score/10 + 3):
                 newEnemy = Enemy()
                 placement = newEnemyPlacement()
                 newEnemy.rect.x = placement[0]
@@ -417,17 +417,15 @@ def event_loop():
             speed[0] = -(enemy.rect.centerx - player.rect.centerx)
             speed[1] = -(enemy.rect.centery - player.rect.centery)
             dist = math.hypot(speed[0], speed[1])
-            speed[0] /= dist
-            speed[1] /= dist
-            enemy.rect.x += speed[0]*2
-            enemy.rect.y += speed[1]*2
+            enemy.rect.x += speed[0]*2/dist
+            enemy.rect.y += speed[1]*2/dist
 
         # Call function to move each enemy
         for enemy in enemy_list:
             # Track player
             Tracking(enemy, player)
 
-
+        # Bullet bounce check
         for bullet in bullet_list:
             if bullet.rect.left < 0 or bullet.rect.right > screen_width :
                 bullet.speed[0] = -bullet.speed[0]
@@ -468,7 +466,6 @@ def event_loop():
             screen.blit(background, [x, y])
 
         # draw background
-        # screen.fill((0, 0, 0))
         background = pygame.image.load(os.path.join('images', 'ground.png'))
         draw_background(background, 0, 0)
 
